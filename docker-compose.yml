@@ -1,0 +1,25 @@
+version: '2'
+
+# docker build -t sports-betting-provider -f Dockerfile .
+services:
+  server:
+    image: proof-relayer
+    restart: always
+    command: server
+    env_file: .env
+    environment:
+      - MONGO_URI=mongodb://mongo:27017?retryWrites=true&writeConcern=majority
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongo    
+  mongo:
+    image: mongo:4.2
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo:/data/db
+    
+volumes:
+  mongo:
