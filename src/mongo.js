@@ -12,6 +12,9 @@ async function loadFromDB(table, query) {
         //console.log(doc)
         events.push(doc)
     } 
+    if (query.date) {
+        query.date = new Date(query.date);
+    }
     console.log(query)
     await findMany(
         DATABASE, table, query, callback
