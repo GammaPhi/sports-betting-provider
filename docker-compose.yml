@@ -13,15 +13,28 @@ services:
       - 5555:5555
     depends_on:
       - mongo
-  scraper:
-    image: sports-scraper:latest
+  scraper-1:
+    image: gcr.io/ehallmarksolutions/sports-scraper:latest
     restart: always
     environment:
       - 'MONGO_HOST=mongo'
-      - 'INTERVAL_SECONDS=300'
+      - 'INTERVAL_SECONDS=3600'
       - 'USE_CACHE=t'
       - 'NUM_DAYS_PAST=7'
       - 'NUM_DAYS_FUTURE=21'
+    volumes:
+      - scraper:/opt/betting_data/
+    depends_on:
+      - mongo
+  scraper-2:
+    image: gcr.io/ehallmarksolutions/sports-scraper:latest
+    restart: always
+    environment:
+      - 'MONGO_HOST=mongo'
+      - 'INTERVAL_SECONDS=600'
+      - 'USE_CACHE=f'
+      - 'NUM_DAYS_PAST=2'
+      - 'NUM_DAYS_FUTURE=2'
     volumes:
       - scraper:/opt/betting_data/
     depends_on:

@@ -31,7 +31,7 @@ async function checkSmartContractEvents() {
         // get unseed events from smart contract
         const metadata = await mongo.findOne(METADATA_TABLE, METADATA_FILTER, {}, {})
         const lastCheckedEventId = (metadata || {}).lastCheckedEventId || 0;
-        const contract = await mongo.getSportsBettingContract();
+        const contract = await lamden.getSportsBettingContract();
         const latestEventId = await lamden.getTotalNumEvents(contract) - 1
         if (latestEventId >= 0) {
             for (let eventId = lastCheckedEventId; eventId <= latestEventId; eventId++) {
