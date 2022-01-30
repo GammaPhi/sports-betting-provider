@@ -39,7 +39,7 @@ const testnet = {
 const lamden = process.env.NETWORK === 'mainnet' ? mainnet : testnet
 
 module.exports = {
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 5555,
   privateKey: process.env.PRIVATE_KEY,
   masterNodeLink: lamden.network['hosts'][0],
   lamden: lamden,
