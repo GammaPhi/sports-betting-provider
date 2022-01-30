@@ -1,9 +1,9 @@
 version: '2'
 
-# docker build -t sports-betting-provider -f Dockerfile .
+# docker build -t sports-betting-provider:latest -f Dockerfile .
 services:
   server:
-    image: proof-relayer
+    image: sports-betting-provider:latest
     restart: always
     command: server
     env_file: .env
@@ -12,7 +12,20 @@ services:
     ports:
       - 5000:5000
     depends_on:
-      - mongo    
+      - mongo
+  scraper:
+    image: sports-scraper:latest
+    restart: always
+    environment:
+      - 'MONGO_HOST=mongo'
+      - 'INTERVAL_SECONDS=300'
+      - 'USE_CACHE=t'
+      - 'NUM_DAYS_PAST=7'
+      - 'NUM_DAYS_FUTURE=21'
+    volumes:
+      - scraper:/opt/betting_data/
+    depends_on:
+      - mongo
   mongo:
     image: mongo:4.2
     restart: always
@@ -23,3 +36,4 @@ services:
     
 volumes:
   mongo:
+  scraper:

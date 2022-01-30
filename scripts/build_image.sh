@@ -1,3 +1,3 @@
 #/bin/sh -e
 
-docker build -t proof-relayer -f Dockerfile .
+docker build -t sports-betting-provider:latest -f Dockerfile .

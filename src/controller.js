@@ -9,7 +9,7 @@ async function events(req, res) {
     try {
         console.log(req.body)
         const query = req.body
-        const results = await loadFromDB('events', query)
+        const results = await loadFromDB('games', query)
         return res.json({data: results})
     } catch(e) {
         return res.status(500).json({error: e.toString()})
@@ -17,11 +17,11 @@ async function events(req, res) {
 }
 
 
-async function sports(req, res) {
+async function totals(req, res) {
     try {
         console.log(req.body)
         const query = req.body
-        const results = await loadFromDB('sports', query)
+        const results = await loadFromDB('totals', query)
         return res.json({data: results})
     } catch(e) {
         return res.status(500).json({error: e.toString()})
@@ -29,11 +29,11 @@ async function sports(req, res) {
 }
 
 
-async function leagues(req, res) {
+async function moneylines(req, res) {
     try {
         console.log(req.body)
         const query = req.body
-        const results = await loadFromDB('leagues', query)
+        const results = await loadFromDB('moneylines', query)
         return res.json({data: results})
     } catch(e) {
         return res.status(500).json({error: e.toString()})
@@ -41,11 +41,11 @@ async function leagues(req, res) {
 }
 
 
-async function countries(req, res) {
+async function spreads(req, res) {
     try {
         console.log(req.body)
         const query = req.body
-        const results = await loadFromDB('countries', query)
+        const results = await loadFromDB('spreads', query)
         return res.json({data: results})
     } catch(e) {
         return res.status(500).json({error: e.toString()})
@@ -56,16 +56,14 @@ async function countries(req, res) {
 async function addEvent(req, res) {
     try {
         console.log(req.body)
-        const eventId = req.body.eventId
-        if (!eventId) {
-            return res.status(400).json({error: 'Please provide an event id.'})
+        const event = request.body.event;
+        if (!event) {
+            return res.status(400).json({error: 'Please provide an event.'})
         }
         const wager = req.body.wager;
         if (!wager) {
             return res.status(400).json({error: 'Please provide a wager.'})
         }
-        const event = await api.getEvent(eventId)
-        const timestamp = api.getTimestampForEvent(event)
         const valid = api.validateWagerForEvent(wager, event)
         if (!valid) {
             return res.status(400).json({error: 'Invalid wager.'})
@@ -77,20 +75,13 @@ async function addEvent(req, res) {
                 'add_event',
                 {
                     metadata: {
-                        idEvent: event.idEvent,
-                        strEvent: event.strEvent,
-                        strHomeTeam: event.strHomeTeam,
-                        strAwayTeam: event.strAwayTeam,
-                        strSport: event.strSport,
-                        strLeague: event.strLeague,
-                        strSeason: event.strSeason,
-                        strVenue: event.strVenue,
-                        strCity: event.strCity,
-                        strCountry: event.strCounty,
-                        strEventAlternate: event.strEventAlternate,
-                        strTimestamp: event.strTimestamp,
+                        away_team: event.away_team,
+                        home_team: event.home_team,
+                        date: event.date,
+                        timestamp: event.timestamp,
+                        sport: event.sport,
                     },
-                    timestamp: timestamp,
+                    timestamp: event.timestamp,
                     wager: wager
                 },
                 config.lamden.stamps.add_event,
@@ -119,9 +110,9 @@ async function addEvent(req, res) {
 
 
 module.exports = {
-    sports: sports,
     events: events,
-    leagues: leagues,
-    countries: countries,
+    moneylines: moneylines,
+    spreads: spreads,
+    totals: totals,
     addEvent: addEvent
 }

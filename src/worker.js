@@ -5,16 +5,11 @@ const lamden = require('./lamden');
 const config = require('./config')
 
 const HOURS_AHEAD = 12
-const COUNTRIES_TABLE = 'countries'
-const SPORTS_TABLE = 'sports'
-const LEAGUES_TABLE = 'leagues'
 const EVENTS_TABLE = 'events'
 const EVENT_METADATA_TABLE = 'event_metadata'
 const METADATA_TABLE = 'metadata'
 const METADATA_FILTER = { type: 'metadata'}
 
-const REFRESH_EVENTS_CRON_SCHEDULE = '*/5 * * * *' // Every 5 minutes
-const REFRESH_OTHER_CRON_SCHEDULE = '*/59 * * * *' // Every 59 minutes
 const CHECK_FOR_COMPLETED_EVENTS_CRON = '*/1 * * * *' // Every 1 minutes
 const CHECK_FOR_CONTRACT_EVENTS_CRON = '*/11 * * * *' // Every Every 11 minutes
 
@@ -29,56 +24,6 @@ Date.prototype.addDays = function(days) {
 const getSecondsSinceEpoch = (date) => {
     return Math.round(date.getTime() / 1000)
 }
-
-
-async function initialize() {
-    try {
-        const sports = await api.listSports()
-        await mongo.upsertBatch(sports.sports, 'idSport', SPORTS_TABLE)
-        const countries = await api.listCountries()
-        await mongo.upsertBatch(countries.countries, 'name_en', COUNTRIES_TABLE)
-        const leagues = await api.listLeagues()
-        await mongo.upsertBatch(leagues.leagues, 'idLeague', LEAGUES_TABLE)    
-    } catch (e) {
-        console.log('Error occured: '+e.toString())
-    }
-}
-
-
-const initializeJob = schedule.scheduleJob(REFRESH_OTHER_CRON_SCHEDULE, function() {
-    console.log('running initialize')
-    initialize().then(()=>{
-        console.log('done')
-    }).catch((e) => {
-        console.log('Error occured: '+e.toString())
-    })
-})
-
-
-async function refreshEvents(sport, country) {
-    try {
-        const currentDate = new Date()
-        for(let i = -1; i < 7; i ++) {
-            const date = currentDate.addDays(i)
-            const dateStr = date.toISOString().substring(0, 10)
-            console.log(dateStr)
-            const events = await api.listEventsOnDay(dateStr, sport, country)
-            await mongo.upsertBatch(events.events, 'idEvent', EVENTS_TABLE)    
-        }    
-    } catch (e) {
-        console.log('Error occured: '+e.toString())
-    }
-}
-
-
-const refreshEventsJob = schedule.scheduleJob(REFRESH_EVENTS_CRON_SCHEDULE, function() {
-    console.log('running refresh events')
-    refreshEvents().then(()=>{
-        console.log('done')
-    }).catch((e) => {
-        console.log('Error occured: '+e.toString())
-    })
-})
 
 
 async function checkSmartContractEvents() {
@@ -145,8 +90,14 @@ async function checkForCompletedEvents() {
         // check if any of these events have completed
         for (let i = 0; i < eventsToCheck.length; i++) {
             const event = eventsToCheck[i];
-            const apiEventId = event.metadata.idEvent;
-            const winningOption = await api.getWinningOption(event.wager, apiEventId);
+            const { away_team, home_team, date, sport } = event.metadata;
+            const actual = mongo.findOne(EVENTS_TABLE, {
+                away_team: away_team,
+                home_team: home_team,
+                date: date,
+                sport: sport
+            })
+            const winningOption = await api.getWinningOption(event.wager, actual);
             if (winningOption !== null) {
                 // interact with smart contract to validate event
                 let returned = false
@@ -155,7 +106,7 @@ async function checkForCompletedEvents() {
                     'validate_event',
                     {
                         event_id: event.event_id,
-                        winning_options: winningOptions
+                        winningOption: winningOption
                     },
                     config.lamden.stamps.validate_event,
                     (results) => {
@@ -194,17 +145,5 @@ const checkForCompletedEventsJob = schedule.scheduleJob(CHECK_FOR_COMPLETED_EVEN
 
 module.exports = {
     checkForCompletedEventsJob: checkForCompletedEventsJob,
-    refreshEventsJob: refreshEventsJob,
-    initializeJob: initializeJob,
     checkSmartContractEventsJob: checkSmartContractEventsJob,
 }
-
-
-initialize().then(()=>{
-    console.log('finished initializing')
-    setTimeout(()=>{
-        refreshEvents().then(()=>{
-            console.log('finished refreshing events')
-        })
-    }, 2000)
-})

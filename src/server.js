@@ -4,7 +4,7 @@ const controller = require('./controller')
 const { port } = require('./config')
 const { version } = require('../package.json')
 const { isAddress } = require('web3-utils')
-const { initializeJob, refreshEventsJob, checkForCompletedEventsJob, checkSmartContractEventsJob } = require('./worker')
+const { checkForCompletedEventsJob, checkSmartContractEventsJob } = require('./worker')
 
 
 const app = express()
@@ -29,10 +29,10 @@ app.use((err, req, res, next) => {
 
 app.get('/', status.status)
 app.get('/status', status.status)
-app.post('/countries', controller.countries)
-app.post('/leagues', controller.leagues)
 app.post('/events', controller.events)
-app.post('/sports', controller.sports)
+app.post('/moneylines', controller.moneylines)
+app.post('/spreads', controller.spreads)
+app.post('/totals', controller.totals)
 app.post('/add', controller.addEvent)
 
 app.listen(port)
