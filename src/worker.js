@@ -31,18 +31,19 @@ async function checkSmartContractEvents() {
         // get unseed events from smart contract
         const metadata = await mongo.findOne(METADATA_TABLE, METADATA_FILTER, {}, {})
         const lastCheckedEventId = (metadata || {}).lastCheckedEventId || 0;
-        const latestEventId = await lamden.getTotalNumEvents() - 1
+        const contract = await mongo.getSportsBettingContract();
+        const latestEventId = await lamden.getTotalNumEvents(contract) - 1
         if (latestEventId >= 0) {
             for (let eventId = lastCheckedEventId; eventId <= latestEventId; eventId++) {
                 console.log('checking contract event id '+eventId.toString())
-                const eventMetadata = await lamden.getEventMetadata(eventId)               
+                const eventMetadata = await lamden.getEventMetadata(contract, eventId)               
                 const event = {
                     event_id: eventId,
                     metadata: eventMetadata,
-                    live: await lamden.getEventIsLive(eventId),
-                    timestamp: await lamden.getEventTimestamp(eventId),
-                    validator: await lamden.getEventValidator(eventId),
-                    wager: await lamden.getEventWager(eventId),
+                    live: await lamden.getEventIsLive(contract, eventId),
+                    timestamp: await lamden.getEventTimestamp(contract, eventId),
+                    validator: await lamden.getEventValidator(contract, eventId),
+                    wager: await lamden.getEventWager(contract, eventId),
                 }
                 // store this event metadata
                 await mongo.upsertOne(
@@ -103,10 +104,16 @@ async function checkForCompletedEvents() {
                 let returned = false
                 lamden.sendTransaction(
                     config.lamden.contract,
-                    'validate_event',
+                    'interact',
                     {
-                        event_id: event.event_id,
-                        winningOption: winningOption
+                        action: 'sports_betting',
+                        payload: {
+                            function: 'validate_event',
+                            kwargs: {
+                                event_id: event.event_id,
+                                winning_option_id: winningOption
+                            }
+                        }
                     },
                     config.lamden.stamps.validate_event,
                     (results) => {

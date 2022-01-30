@@ -2,7 +2,7 @@
 const lamden = require('./lamden')
 const config = require('./config');
 const api = require('./sports')
-const { loadFromDB } = require('./mongo')
+const { loadFromDB, findOne } = require('./mongo')
 
 
 async function events(req, res) {
@@ -68,21 +68,37 @@ async function addEvent(req, res) {
         if (!valid) {
             return res.status(400).json({error: 'Invalid wager.'})
         }
+        const storedEvent = await findOne("games", {
+            away_team: event.away_team,
+            home_team: event.home_team,
+            date: event.date,
+            timestamp: event.timestamp,
+            sport: event.sport,
+        });
+        if (storedEvent === null) {
+            return res.status(400).json({error: 'Event not found.'})
+        }
         let returned = false;
         if (timestamp && wager) {
             lamden.sendTransaction(
                 config.lamden.contract,
-                'add_event',
+                'interact',
                 {
-                    metadata: {
-                        away_team: event.away_team,
-                        home_team: event.home_team,
-                        date: event.date,
-                        timestamp: event.timestamp,
-                        sport: event.sport,
-                    },
-                    timestamp: event.timestamp,
-                    wager: wager
+                    action: 'sports_betting',
+                    payload: {
+                        function: 'add_event',
+                        kwargs: {
+                            metadata: {
+                                away_team: event.away_team,
+                                home_team: event.home_team,
+                                date: event.date,
+                                timestamp: event.timestamp,
+                                sport: event.sport,
+                            },
+                            timestamp: event.timestamp,
+                            wager: wager
+                        }
+                    }
                 },
                 config.lamden.stamps.add_event,
                 (results) => {
