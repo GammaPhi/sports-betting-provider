@@ -4,8 +4,8 @@ const api = require('./sports');
 const lamden = require('./lamden');
 const config = require('./config')
 
-const HOURS_AHEAD = 12
-const EVENTS_TABLE = 'events'
+const HOURS_AHEAD = 3
+const EVENTS_TABLE = 'games'
 const EVENT_METADATA_TABLE = 'event_metadata'
 const METADATA_TABLE = 'metadata'
 const METADATA_FILTER = { type: 'metadata'}
