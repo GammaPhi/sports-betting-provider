@@ -92,9 +92,9 @@ async function getTotalNumEvents(contract) {
 
 async function readStateFromContract(contract, variableName, keys, default_value) {
     try {
-        let url = `${config.masterNodeLink}/contracts/${contract}/${variableName}`
+        let url = `${config.apiLink}/current/one/${contract}/${variableName}`
         if (keys.length > 0) {
-            `${url}?key=${keys.join(':')}`
+            `${url}/${keys.join(':')}`
         }
         const res = await fetch({
                 url: url,

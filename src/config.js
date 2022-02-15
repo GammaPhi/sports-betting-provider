@@ -1,8 +1,7 @@
 require('dotenv').config()
 
 const mainnet = {
-  apiLink: "https://mainnet.lamden.io/api",
-  addressExplorer: "https://mainnet.lamden.io/addresses",
+  apiLink: "https://blocks.gammaphi.io",
   network: {
       "name": "Lamden Mainnet", 
       "hosts": ["https://masternode-01.lamden.io"],
@@ -20,7 +19,6 @@ const mainnet = {
 
 const testnet = {
   apiLink: "https://testnet.lamden.io/api",
-  addressExplorer: "https://testnet.lamden.io/addresses",
   network: {
       "name": "Lamden Testnet", 
       "hosts": ["https://testnet-master-1.lamden.io"], 
@@ -41,7 +39,7 @@ const lamden = process.env.NETWORK === 'mainnet' ? mainnet : testnet
 module.exports = {
   port: process.env.PORT || 5555,
   privateKey: process.env.PRIVATE_KEY,
-  masterNodeLink: lamden.network['hosts'][0],
+  apiLink: lamden.apiLink,
   lamden: lamden,
   sportsDBApiKey: process.env.SPORTSDB_API_KEY,
   mongoUri: process.env.MONGO_URI
