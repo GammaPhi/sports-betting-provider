@@ -33,7 +33,6 @@ app.post('/events', controller.events)
 app.post('/moneylines', controller.moneylines)
 app.post('/spreads', controller.spreads)
 app.post('/totals', controller.totals)
-//app.post('/add', controller.addEvent)
 
 app.listen(port)
 console.log(`Provider ${version} started on port ${port}`)  
