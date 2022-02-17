@@ -14,7 +14,7 @@ const mainnet = {
       validate_event: 5000,
       add_event: 3000,
   },
-  contract: 'con_sports_betting',
+  contract: 'con_gamma_phi_dao_v1',
 }
 
 const testnet = {
@@ -31,7 +31,7 @@ const testnet = {
       validate_event: 5000,
       add_event: 3000,
   },
-  contract: 'con_sports_betting',
+  contract: 'con_gamma_phi_dao_v1',
 } 
 
 const lamden = process.env.NETWORK === 'mainnet' ? mainnet : testnet

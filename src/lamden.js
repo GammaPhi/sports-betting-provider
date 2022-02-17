@@ -43,7 +43,7 @@ function sendTransaction(
 
 async function getSportsBettingContract() {
     return await readStateFromContract(
-        config.lamden.contract, 'actions', ['sports_betting'], 'con_sports_betting_v1'
+        config.lamden.contract, 'actions', ['sports_betting'], 'con_sports_betting_event_action_v1'
     )
 }
 
